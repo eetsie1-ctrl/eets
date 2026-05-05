@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unlock the System</title>
+
+<style>
+body {
+    margin:0;
+    background:white;
+    font-family: "Helvetica Neue", sans-serif;
+    text-align:center;
+}
+
+/* INTRO */
+#intro {
+    position:fixed;
+    top:20%;
+    left:50%;
+    transform:translateX(-50%);
+    background:#ff4fa3;
+    color:#ffe86b;
+    padding:20px;
+    border-radius:14px;
+    width:80%;
+    max-width:320px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* BUTTON */
+button {
+    margin-top:10px;
+    padding:8px 14px;
+    border:none;
+    background:black;
+    color:white;
+    cursor:pointer;
+}
+
+/* LOCK WRAPPER */
+.lock-container {
+    margin-top:80px;
+    display:inline-block;
+    cursor:pointer;
+}
+
+/* WOBBLE */
+@keyframes wobble {
+    0%{transform:rotate(0deg);}
+    25%{transform:rotate(2deg);}
+    50%{transform:rotate(0deg);}
+    75%{transform:rotate(-2deg);}
+    100%{transform:rotate(0deg);}
+}
+
+.lock-container {
+    animation:wobble 3s infinite;
+}
+
+/* LOCK SVG */
+.lock svg {
+    width:160px;
+}
+
+/* DIALS */
+.dials {
+    margin-top:20px;
+    display:none;
+}
+
+.dial {
+    display:inline-block;
+    font-size:30px;
+    padding:10px;
+    margin:5px;
+    border:2px solid black;
+    cursor:pointer;
+}
+
+/* CLUES */
+#clues {
+    margin-top:20px;
+    display:none;
+}
+
+/* RESULT */
+#result {
+    margin-top:10px;
+}
+
+/* HINT */
+#hintBox {
+    position:fixed;
+    bottom:10px;
+    right:10px;
+    font-size:14px;
+    text-align:right;
+}
+</style>
+</head>
+
+<body>
+
+<div id="intro">
+<b>HOW TO PLAY</b><br><br>
+Click the lock.<br>
+Use clues.<br>
+Spin numbers.<br>
+3 tries only.<br>
+<br>
+<button onclick="start()">got this</button>
+</div>
+
+<div class="lock-container" onclick="activate()">
+<div class="lock">
+<svg viewBox="0 0 100 120">
+<rect x="20" y="40" width="60" height="60" rx="8"
+fill="url(#gold)"/>
+<path d="M30 40 V25 a20 20 0 0 1 40 0 V40"
+stroke="url(#gold)" stroke-width="6" fill="none"/>
+<defs>
+<linearGradient id="gold">
+<stop offset="0%" stop-color="#bfa046"/>
+<stop offset="50%" stop-color="#ffd700"/>
+<stop offset="100%" stop-color="#bfa046"/>
+</linearGradient>
+</defs>
+</svg>
+</div>
+</div>
+
+<div id="clues"></div>
+
+<div class="dials" id="dials">
+<div class="dial" onclick="spin(0)">0</div>
+<div class="dial" onclick="spin(1)">0</div>
+<div class="dial" onclick="spin(2)">0</div>
+<br>
+<button onclick="check()">unlock</button>
+</div>
+
+<div id="result"></div>
+<div id="hintBox"></div>
+
+<script>
+let puzzles = [
+{
+code:[0,4,2],
+clues:[
+"682 → one digit right and in place",
+"614 → one digit right but wrong place",
+"206 → two digits right but wrong place",
+"738 → nothing correct",
+"380 → one digit right but wrong place"
+]
+},
+{
+code:[5,1,7],
+clues:[
+"123 → one digit correct wrong place",
+"567 → one digit correct & correct place",
+"891 → nothing correct",
+"517 → two digits correct wrong place",
+"745 → one digit correct wrong place"
+]
+}
+];
+
+let current, attempts=3;
+let values=[0,0,0];
+
+function start(){
+document.getElementById("intro").style.display="none";
+}
+
+function activate(){
+current = puzzles[Math.floor(Math.random()*puzzles.length)];
+attempts=3;
+values=[0,0,0];
+
+document.getElementById("clues").style.display="block";
+document.getElementById("dials").style.display="block";
+
+let html="";
+current.clues.forEach(c=>html+="<div>"+c+"</div>");
+document.getElementById("clues").innerHTML=html;
+
+updateDials();
+document.getElementById("result").innerText="";
+document.getElementById("hintBox").innerText="";
+}
+
+function spin(i){
+values[i] = (values[i]+1)%10;
+updateDials();
+}
+
+function updateDials(){
+let d=document.getElementsByClassName("dial");
+for(let i=0;i<3;i++){
+d[i].innerText=values[i];
+}
+}
+
+function check(){
+if(JSON.stringify(values)===JSON.stringify(current.code)){
+document.getElementById("result").innerText="unlocked.";
+document.getElementById("hintBox").innerText="system approved.";
+return;
+}
+
+attempts--;
+
+if(attempts>0){
+document.getElementById("result").innerText="try again ("+attempts+")";
+}else{
+document.getElementById("result").innerText="denied.";
+document.getElementById("hintBox").innerHTML=
+"hint: placement matters<br>code: "+current.code.join("");
+}
+}
+</script>
+
+</body>
+</html>
